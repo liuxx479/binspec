@@ -164,9 +164,9 @@ def get_normalized_spectrum_N(labels, NN_coeffs_norm, NN_coeffs_flux,
     
     f_lambda_N = f_lambda1.copy()
     ## now determin the number of additional components, each with q, vmacro, dv
-    N = (len(labels)-6)/3
+    N = int((len(labels)-6)/3)
     for n in range(N):
-        q, vmacro2, dv2 = labels[6+n*3:9+n*3]:
+        q, vmacro2, dv2 = labels[6+n*3:9+n*3]
         Teff2, logg2 = get_Teff2_logg2_NN(labels = [Teff1, logg1, feh, q], 
         NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
         labels2 = [Teff2, logg2, feh, alphafe, vmacro2, dv2]    

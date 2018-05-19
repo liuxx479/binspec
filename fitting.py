@@ -233,7 +233,7 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
         elif model == 'N': # for combined spectrum of N component
             dq = (1 - lower[6])/(num_p0 - 1)
             all_q0 = np.arange(lower[6] + 1e-5, upper[6], dq) ### this is for the 2ndary star q
-            N = (len(lower)-6)/3
+            N = int((len(lower)-6)/3)
             
             for q in all_q0:
                 teff = np.random.uniform(max(lower[0], p0[0] - 300), min(upper[0], p0[0] + 500))
