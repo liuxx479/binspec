@@ -116,6 +116,78 @@ def fit_normalized_spectrum_binary_model(norm_spec, spec_err,
         
     return popt, pcov, model_spec    
 
+def fit_normalized_spectrum_N(norm_spec, spec_err,
+    NN_coeffs_norm, NN_coeffs_flux, NN_coeffs_Teff2_logg2, NN_coeffs_R,
+    p0_single, num_p0 = 10, N=3):
+    '''
+    fit a N component model to a single combined spectrum.
+    
+    N is the number of stars in the combined spectrum.
+    
+    p0_single=labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro, dv] 
+        is an initial guess for the labels *of a single star* used to 
+        initialize the optimizer. A reasonable approach is to first fit a 
+        single-star model, and then use the best-fit parameters from that 
+        as a starting guess for the binary model.
+    
+    if num_p0 is set to a number greater than 1, this will initialize a bunch
+        of different walkers at different points in parameter space. If they 
+        converge on different solutions, it will pick the one with the lowest
+        chi2. Most of the time, the code *does* find the best-fit model with a
+        single walker, but the posterior generally *is* bimodal in q, so setting
+        num_p0 > 1 can help. 
+    
+    ### labels = [Teff, logg, [Fe/H], [Mg/Fe], q, vmacro1, vmacro2, dv1, dv2]
+    labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro1, dv1] 
+             + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN]
+    
+    returns:
+        popt: the best-fit labels
+        pcov: the covariance matrix, from which you can get formal fitting uncertainties
+        model_spec: the model spectrum corresponding to popt 
+    '''
+    tol = 5e-4 # tolerance for when the optimizer should stop optimizing.
+    
+    ######## done re-write
+    def fit_func(dummy_variable, *labels):
+        norm_spec = spectral_model.get_normalized_spectrum_N(labels = labels, 
+            NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
+            NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2, NN_coeffs_R = NN_coeffs_R, 
+            spec_err = spec_err)
+        return norm_spec
+        
+    teff1, logg1, feh, alphafe, vmacro1, dv1 = p0_single
+    
+    # a cluster where all stars are identical (should have a spectrum identical to 
+    # that of the primary only)
+    p0 = [teff1, logg1, feh, alphafe, vmacro1, dv1] + [1, vmacro1, dv1]* (N-1)
+    
+    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    
+    lower = [4200, 4.0, -1, -0.3, 0, -100] + [min_q, 0, -100]*(N-1) 
+    upper = [7000, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100]*(N-1)
+    bounds = [lower, upper]
+    
+    # if we want to initialize many walkers in different parts of parameter space, do so now. 
+    ######## done re-write
+    all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p0, bounds = bounds, 
+        num_p0 = num_p0, vrange = 30, model = 'N')
+    
+    # run the optimizer
+    popt, pcov, model_spec = fit_all_p0s(fit_func = fit_func, norm_spec = norm_spec, 
+        spec_err = spec_err, all_x0 = all_x0, bounds = bounds, tol = tol)
+
+    # make sure a better fit can't be obtained with a single-star model
+    single_model = fit_func([], *p0)
+    chi2_single = np.sum((single_model - norm_spec)**2/(spec_err)**2) 
+    chi2_N = np.sum((model_spec - norm_spec)**2/(spec_err)**2)
+    
+    if chi2_single < chi2_N:
+        popt, model_spec = p0, single_model
+        
+    return popt, pcov, model_spec 
+
 def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange = 10,
     model = 'single_star'):
     '''
