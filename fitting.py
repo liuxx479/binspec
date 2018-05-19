@@ -157,6 +157,31 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                 dv2 = np.random.uniform(max(lower[5], p0[5] - vrange), min(upper[5], p0[5] + vrange))
                 this_p0 = np.array([teff, logg, feh, alpha, q, vmac1, vmac1, dv1, dv2])
                 all_x0.append(this_p0)  
+
+        elif model == 'N': # for combined spectrum of N component
+            dq = (1 - lower[6])/(num_p0 - 1)
+            all_q0 = np.arange(lower[6] + 1e-5, upper[6], dq) ### this is for the 2ndary star q
+            N = (len(lower)-6)/3
+            
+            for q in all_q0:
+                teff = np.random.uniform(max(lower[0], p0[0] - 300), min(upper[0], p0[0] + 500))
+                logg = np.random.uniform(max(lower[1], p0[1] - 0.2), min(upper[1], p0[1] + 0.2))
+                feh = np.random.uniform(max(lower[2], p0[2] - 0.2), min(upper[2], p0[2] + 0.2))
+                alpha = np.random.uniform(max(lower[3], p0[3] - 0.05), min(upper[3], p0[3] + 0.05))
+                vmac1 = np.random.uniform(max(lower[4], p0[4] - 10), min(upper[4], p0[4] + 10))
+                dv1 = np.random.uniform(max(lower[5], p0[5] - vrange), min(upper[5], p0[5] + vrange))
+                
+                this_p0 = [teff, logg, feh, alpha, vmac1, dv1]
+                
+                q2=q ### initialize companion q, each time it's half between the least largest and min
+                for n in range(N):
+                    #q2, vmacro2, dv2 = labels[6+n*3:9+n*3]
+                    q2 = 0.5*(lower[6+n*3]+q2)
+                    vmac2 = np.random.uniform(max(lower[7+n*3], p0[7+n*3] - 10), min(upper[7+n*3], p0[7+n*3] + 10))
+                    dv2 = np.random.uniform(max(lower[8+n*3], p0[8+n*3] - vrange), min(upper[8+n*3], p0[8+n*3] + vrange))
+                    
+                    this_p0+=[q2,vmac2,dv2]
+                all_x0.append(array(this_p0))  
         
         elif model == 'sb1':
             for i in range(num_p0-1):
