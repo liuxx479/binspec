@@ -147,6 +147,39 @@ def get_normalized_spectrum_single_star(labels, NN_coeffs_norm, NN_coeffs_flux,
     f_lambda_norm = f_lambda/cont
     return f_lambda_norm
 
+def get_normalized_spectrum_N(labels, NN_coeffs_norm, NN_coeffs_flux, 
+    NN_coeffs_Teff2_logg2, NN_coeffs_R, spec_err = None):
+    '''Determine Teff and logg of the non-primary stars, predict the normalized spectra of 
+    the primary,secondary,thrid,etc. stars, add them together, and normalize. 
+    
+    labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro1, dv1] 
+            + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN]
+            '''
+
+    Teff1, logg1, feh, alphafe, vmacro1, dv1 = labels[:6]
+    labels1 = [Teff1, logg1, feh, alphafe, vmacro1, dv1]
+    f_lambda1 = get_unnormalized_spectrum_single_star(labels = labels1, 
+        NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
+        NN_coeffs_R = NN_coeffs_R)
+    
+    f_lambda_N = f_lambda1.copy()
+    ## now determin the number of additional components, each with q, vmacro, dv
+    N = (len(labels)-6)/3
+    for n in range(N):
+        q, vmacro2, dv2 = labels[6+n*3:9+n*3]:
+        Teff2, logg2 = get_Teff2_logg2_NN(labels = [Teff1, logg1, feh, q], 
+        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+        labels2 = [Teff2, logg2, feh, alphafe, vmacro2, dv2]    
+        f_lambda2 = get_unnormalized_spectrum_single_star(labels = labels2, 
+        NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
+        NN_coeffs_R = NN_coeffs_R)
+        f_lambda_N+=f_lambda2
+    
+    cont = utils.get_apogee_continuum(wavelength = wavelength, spec = f_lambda_N, 
+        spec_err = spec_err, cont_pixels = cont_pixels)
+    f_lambda_N_norm = f_lambda_N/cont
+    return f_lambda_N_norm
+
 def get_radius_NN(input_labels, NN_coeffs_R):
     '''
     Predict the radius, in units of Rsun, of a single star with particular [Teff, logg, feh]
