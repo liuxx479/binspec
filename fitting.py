@@ -189,6 +189,41 @@ def fit_normalized_spectrum_N(norm_spec, spec_err,
         
     return popt, pcov, model_spec 
 
+def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux, 
+    v_helios, p0, num_p0 = 10, N=3, fix_vmac=0, vmac = 6):
+    '''
+    fit a set of visit spectra for a single object simultaneously, N components
+    
+    v_helios is a guess of the heliocentric velocity at each visit, taken from 
+        the allStar catalog.
+    p0 is a starting guess for the optimizer, typically obtained from fitting
+        the combined spectrum
+    '''
+    tol = 5e-4 # tolerance for when the optimizer should stop optimizing.
+    stitched_spec, stitched_errs = np.concatenate(norm_spectra), np.concatenate(spec_errs)
+    
+    def fit_func(dummy_variable, *labels):
+        ##### JL: need to rewrite this
+        stitched_model = spectral_model.sbN_model_visit_spectra(labels = labels,
+            spec_errs = spec_errs, NN_coeffs_norm = NN_coeffs_norm, 
+            NN_coeffs_flux = NN_coeffs_flux)
+        return stitched_model
+        
+    v_min, v_max = np.min(v_helios), np.max(v_helios)
+    lower = np.concatenate([[4200, 4.0, -1, -0.3, 0], len(v_helios) * [-100 + v_min]])
+    upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
+    bounds = [lower, upper]
+    
+    p00 = np.concatenate([p0[:5], v_helios])
+    ##### JL: need to rewrite this
+    all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p00, bounds = bounds, 
+        num_p0 = num_p0, vrange = (v_max - v_min)/2, model = 'sbN')
+        
+    popt, pcov, model_spec = fit_all_p0s(fit_func = fit_func, norm_spec = stitched_spec, 
+        spec_err = stitched_errs, all_x0 = all_x0, bounds = bounds, tol = tol)
+    model_specs = utils.unstitch_model_spectra(model_spec = model_spec, wavelength = wavelength)
+    return popt, pcov, model_specs
+
 def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange = 10,
     model = 'single_star'):
     '''

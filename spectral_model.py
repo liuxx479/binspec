@@ -181,6 +181,42 @@ def get_normalized_spectrum_N(labels, NN_coeffs_norm, NN_coeffs_flux,
     f_lambda_N_norm = f_lambda_N/cont
     return f_lambda_N_norm
 
+############## added by JL this one let vmac, RV to float freely
+def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux):
+    '''
+    get the spectra predicted by the model for several visits. 
+    require the structural labels of the star to be the same at each visit,
+    but allow Vmac, RV to vary between visits.
+        
+    #### labels = (Teff, logg, [Fe/h], [Mg/Fe], vmacro, dv_i), where i = 0...N_visits
+    spec_errs is a list of error arrays, one for each visit. 
+    
+    Nv = len(spec_errs)
+    labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro1, dv1] 
+             + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN] ## then below is new
+             + [RV1_v2, RV2_v2.. RVN_v2] +
+             ...
+             + [RV1_vN, RV2_vN.. RVN_vN]
+    
+    len(labels)==6+3*(N-1)+N(Nv-1) 
+    
+    Returns the model spectra for each visit, stitched together end-to-end 
+        for convenience in fitting. 
+    '''
+    Teff, logg, feh, alpha = labels[:4]
+    Nv = len(spec_errs)
+    N = (len(labels)-3)/(2+Nv)
+    
+    all_norm_specs = []
+    for i, spec_err in enumerate(spec_errs):
+        this_label = [Teff, logg, feh, alpha, vmacro, dv_i[i]]
+        this_spec = get_normalized_spectrum_single_star(labels = this_label, 
+            NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
+            spec_err = spec_err)
+        all_norm_specs.append(this_spec)
+    stitched_norm_spec = np.concatenate(all_norm_specs)
+    return stitched_norm_spec
+
 def get_radius_NN(input_labels, NN_coeffs_R):
     '''
     Predict the radius, in units of Rsun, of a single star with particular [Teff, logg, feh]
