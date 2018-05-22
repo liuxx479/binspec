@@ -186,9 +186,7 @@ def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux):
     '''
     get the spectra predicted by the model for several visits. 
     require the structural labels of the star to be the same at each visit,
-    but allow Vmac, RV to vary between visits.
-        
-    #### labels = (Teff, logg, [Fe/h], [Mg/Fe], vmacro, dv_i), where i = 0...N_visits
+    but allow RV to vary between visits.
     spec_errs is a list of error arrays, one for each visit. 
     
     Nv = len(spec_errs)
@@ -211,9 +209,10 @@ def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux):
     for i, spec_err in enumerate(spec_errs):
         this_label = labels[: int(6+3*(N-1))] ## for the first visit
         if i>0:
-            this_label[:6::3] = RV_arr[i-1] ## update the velocity
-        this_spec = get_normalized_spectrum_single_star(labels = this_label, 
+            this_label[5::3] = RV_arr[i-1] ## update the velocity
+        this_spec = get_normalized_spectrum_N(labels = this_label, 
             NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
+            NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2, NN_coeffs_R = NN_coeffs_R, 
             spec_err = spec_err)
         all_norm_specs.append(this_spec)
     stitched_norm_spec = np.concatenate(all_norm_specs)
