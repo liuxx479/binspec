@@ -182,7 +182,8 @@ def get_normalized_spectrum_N(labels, NN_coeffs_norm, NN_coeffs_flux,
     return f_lambda_N_norm
 
 ############## added by JL this one let vmac, RV to float freely
-def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux):
+def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
+                            NN_coeffs_Teff2_logg2, NN_coeffs_R):
     '''
     get the spectra predicted by the model for several visits. 
     require the structural labels of the star to be the same at each visit,

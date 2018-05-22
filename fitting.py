@@ -190,7 +190,8 @@ def fit_normalized_spectrum_N(norm_spec, spec_err,
     return popt, pcov, model_spec 
 
 def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux, 
-    v_helios, p0, num_p0 = 10, N=3, fix_vmac=0, vmac = 6):
+                        NN_coeffs_Teff2_logg2, NN_coeffs_R,
+                        v_helios, p0_single, num_p0 = 10, N=3, fix_vmac=0, vmac = 6):
     '''
     fit a set of visit spectra for a single object simultaneously, N components
     
@@ -198,20 +199,36 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
         the allStar catalog.
     p0 is a starting guess for the optimizer, typically obtained from fitting
         the combined spectrum
+    labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro1, dv1] 
+             + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN] ## then below is new
+             + [RV1_v2, RV2_v2.. RVN_v2] +
+             ...
+             + [RV1_vN, RV2_vN.. RVN_vN]
     '''
     tol = 5e-4 # tolerance for when the optimizer should stop optimizing.
     stitched_spec, stitched_errs = np.concatenate(norm_spectra), np.concatenate(spec_errs)
+    Nv = len(spec_errs)
     
     def fit_func(dummy_variable, *labels):
-        ##### JL: need to rewrite this
         stitched_model = spectral_model.sbN_model_visit_spectra(labels = labels,
-            spec_errs = spec_errs, NN_coeffs_norm = NN_coeffs_norm, 
-            NN_coeffs_flux = NN_coeffs_flux)
+            spec_errs = spec_errs, NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux,
+            NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2, NN_coeffs_R = NN_coeffs_R)
         return stitched_model
-        
+     
+    teff1, logg1, feh, alphafe, vmacro1, dv1 = p0_single
+    
+    # a cluster where all stars are identical (should have a spectrum identical to 
+    # that of the primary only)
+    p0 = [teff1, logg1, feh, alphafe, vmacro1, dv1] + [1, vmacro1, dv1]* (N-1) + [dv1,]*N*(Nv-1)
+    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    
     v_min, v_max = np.min(v_helios), np.max(v_helios)
-    lower = np.concatenate([[4200, 4.0, -1, -0.3, 0], len(v_helios) * [-100 + v_min]])
-    upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
+    
+    lower = [4200, 4.0, -1, -0.3, 0, -100] + [min_q, 0, -100+v_min]*(N-1) +  [-100+v_min,]*N*(Nv-1)
+    upper = [7000, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100+v_max]*(N-1) + [100+v_max,]*N*(Nv-1)
+    #lower = np.concatenate([[4200, 4.0, -1, -0.3, 0], len(v_helios) * [-100 + v_min]])
+    #upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
     bounds = [lower, upper]
     
     p00 = np.concatenate([p0[:5], v_helios])
