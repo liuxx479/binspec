@@ -204,6 +204,7 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
              + [RV1_v2, RV2_v2.. RVN_v2] +
              ...
              + [RV1_vN, RV2_vN.. RVN_vN]
+    len(labels)=6+3(N-1)+N*(Nv-1)
     '''
     tol = 5e-4 # tolerance for when the optimizer should stop optimizing.
     stitched_spec, stitched_errs = np.concatenate(norm_spectra), np.concatenate(spec_errs)
@@ -231,18 +232,19 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     #upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
     bounds = [lower, upper]
     
-    p00 = np.concatenate([p0[:5], v_helios])
+    #p00 = np.concatenate([p0[:5], v_helios])
+    
     ##### JL: need to rewrite this
-    all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p00, bounds = bounds, 
-        num_p0 = num_p0, vrange = (v_max - v_min)/2, model = 'sbN')
+    all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p0, bounds = bounds, 
+        num_p0 = num_p0, vrange = (v_max - v_min)/2, model = 'sbN', Nv=Nv, N=N)
         
     popt, pcov, model_spec = fit_all_p0s(fit_func = fit_func, norm_spec = stitched_spec, 
         spec_err = stitched_errs, all_x0 = all_x0, bounds = bounds, tol = tol)
     model_specs = utils.unstitch_model_spectra(model_spec = model_spec, wavelength = wavelength)
     return popt, pcov, model_specs
 
-def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange = 10,
-    model = 'single_star'):
+def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange = 30,
+    model = 'single_star', Nv=None, N=None):
     '''
     if we want to initialize many walkers in different parts of parameter space. 
     p0 is the initial guess around which to cluster our other guesses
@@ -307,7 +309,33 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                     
                     this_p0+=[q2,vmac2,dv2]
                 all_x0.append(np.array(this_p0))  
-        
+
+        elif model == 'sbN': # for combined spectrum of N component, with Nv visits
+            dq = (1 - lower[6])/(num_p0 - 1)
+            all_q0 = np.arange(lower[6] + 1e-5, upper[6], dq) ### this is for the 2ndary star q
+            
+            for q in all_q0:
+                teff = np.random.uniform(max(lower[0], p0[0] - 300), min(upper[0], p0[0] + 500))
+                logg = np.random.uniform(max(lower[1], p0[1] - 0.2), min(upper[1], p0[1] + 0.2))
+                feh = np.random.uniform(max(lower[2], p0[2] - 0.2), min(upper[2], p0[2] + 0.2))
+                alpha = np.random.uniform(max(lower[3], p0[3] - 0.05), min(upper[3], p0[3] + 0.05))
+                vmac1 = np.random.uniform(max(lower[4], p0[4] - 10), min(upper[4], p0[4] + 10))
+                dv1 = np.random.uniform(max(lower[5], p0[5] - vrange), min(upper[5], p0[5] + vrange))
+                
+                this_p0 = [teff, logg, feh, alpha, vmac1, dv1]
+                
+                q2=q ### initialize companion q, each time it's half between the least largest and min
+                for n in range(N):
+                    #q2, vmacro2, dv2 = labels[6+n*3:9+n*3]
+                    q2 = 0.5*(lower[6+n*3]+q2)
+                    vmac2 = np.random.uniform(max(lower[7+n*3], p0[7+n*3] - 10), min(upper[7+n*3], p0[7+n*3] + 10))
+                    dv2 = np.random.uniform(max(lower[8+n*3], p0[8+n*3] - vrange), min(upper[8+n*3], p0[8+n*3] + vrange))
+                    
+                    this_p0+=[q2,vmac2,dv2]
+                for j in range(len(this_p0), len(p0)): ## append guesses for other RVs
+                    this_p0+=np.random.uniform(max(lower[j], p0[j] - vrange), min(upper[j], p0[j] + vrange))
+                all_x0.append(np.array(this_p0))  
+                
         elif model == 'sb1':
             for i in range(num_p0-1):
                 p0_dv_i = p0[5:]
