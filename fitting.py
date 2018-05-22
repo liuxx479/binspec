@@ -234,9 +234,9 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     
     #p00 = np.concatenate([p0[:5], v_helios])
     
-    ##### JL: need to rewrite this
+    ##### initial walkers
     all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p0, bounds = bounds, 
-        num_p0 = num_p0, vrange = (v_max - v_min)/2, model = 'sbN', Nv=Nv, N=N)
+        num_p0 = num_p0, model = 'sbN', Nv=Nv, N=N) ##vrange = (v_max - v_min)/2
         
     popt, pcov, model_spec = fit_all_p0s(fit_func = fit_func, norm_spec = stitched_spec, 
         spec_err = stitched_errs, all_x0 = all_x0, bounds = bounds, tol = tol)
