@@ -116,6 +116,7 @@ def fit_normalized_spectrum_binary_model(norm_spec, spec_err,
         
     return popt, pcov, model_spec    
 
+########## added by JL
 def fit_normalized_spectrum_N(norm_spec, spec_err,
     NN_coeffs_norm, NN_coeffs_flux, NN_coeffs_Teff2_logg2, NN_coeffs_R,
     p0_single, num_p0 = 10, N=3):
@@ -253,7 +254,7 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                     dv2 = np.random.uniform(max(lower[8+n*3], p0[8+n*3] - vrange), min(upper[8+n*3], p0[8+n*3] + vrange))
                     
                     this_p0+=[q2,vmac2,dv2]
-                all_x0.append(array(this_p0))  
+                all_x0.append(np.array(this_p0))  
         
         elif model == 'sb1':
             for i in range(num_p0-1):

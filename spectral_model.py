@@ -147,6 +147,7 @@ def get_normalized_spectrum_single_star(labels, NN_coeffs_norm, NN_coeffs_flux,
     f_lambda_norm = f_lambda/cont
     return f_lambda_norm
 
+########## added by JL
 def get_normalized_spectrum_N(labels, NN_coeffs_norm, NN_coeffs_flux, 
     NN_coeffs_Teff2_logg2, NN_coeffs_R, spec_err = None):
     '''Determine Teff and logg of the non-primary stars, predict the normalized spectra of 
