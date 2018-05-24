@@ -303,7 +303,7 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                 this_p0 = [teff, logg, feh, alpha, vmac1, dv1]
                 
                 q2=q ### initialize companion q, each time it's half between the least largest and min
-                for n in range(N):
+                for n in range(N-1):
                     #q2, vmacro2, dv2 = labels[6+n*3:9+n*3]
                     q2 = 0.5*(lower[6+n*3]+q2)
                     vmac2 = np.random.uniform(max(lower[7+n*3], p0[7+n*3] - 10), min(upper[7+n*3], p0[7+n*3] + 10))
@@ -327,9 +327,9 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                 this_p0 = [teff, logg, feh, alpha, vmac1, dv1]
                 
                 q2=q ### initialize companion q, each time it's half between the least largest and min
-                for n in range(N):
-                    #q2, vmacro2, dv2 = labels[6+n*3:9+n*3]
-                    print (lower, 6+n*3)
+                for n in range(N-1):
+                    q2, vmacro2, dv2 = labels[6+n*3:9+n*3]
+                    #print (lower, 6+n*3)
                     q2 = 0.5*(lower[6+n*3]+q2)
                     vmac2 = np.random.uniform(max(lower[7+n*3], p0[7+n*3] - 10), min(upper[7+n*3], p0[7+n*3] + 10))
                     dv2 = np.random.uniform(max(lower[8+n*3], p0[8+n*3] - vrange), min(upper[8+n*3], p0[8+n*3] + vrange))
