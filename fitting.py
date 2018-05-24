@@ -211,6 +211,8 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     Nv = len(spec_errs)
     
     def fit_func(dummy_variable, *labels):
+        #print ('test')
+        #print (labels)
         stitched_model = spectral_model.sbN_model_visit_spectra(labels = labels,
             spec_errs = spec_errs, NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux,
             NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2, NN_coeffs_R = NN_coeffs_R)
@@ -333,7 +335,7 @@ def generate_starting_guesses_to_initialze_optimizers(p0, bounds, num_p0, vrange
                     
                     this_p0+=[q2,vmac2,dv2]
                 for j in range(len(this_p0), len(p0)): ## append guesses for other RVs
-                    this_p0+=np.random.uniform(max(lower[j], p0[j] - vrange), min(upper[j], p0[j] + vrange))
+                    this_p0+=[np.random.uniform(max(lower[j], p0[j] - vrange), min(upper[j], p0[j] + vrange)),]
                 all_x0.append(np.array(this_p0))  
                 
         elif model == 'sb1':

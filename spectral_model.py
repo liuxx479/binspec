@@ -202,15 +202,18 @@ def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     Returns the model spectra for each visit, stitched together end-to-end 
         for convenience in fitting. 
     '''
-
+    #print (labels)
+    labels=list(labels)
     Nv = len(spec_errs)
     N = (len(labels)-3)/(2+Nv)
-    RV_arr = np.array(labels[int(6+3*(N-1)):]).reshape(Nv-1,N)
+    RV_arr = np.array(labels[int(6+3*(N-1)):]).reshape(int(Nv-1),int(N))
     all_norm_specs = []
     for i, spec_err in enumerate(spec_errs):
         this_label = labels[: int(6+3*(N-1))] ## for the first visit
         if i>0:
+            #print (this_label)
             this_label[5::3] = RV_arr[i-1] ## update the velocity
+            #print (this_label)
         this_spec = get_normalized_spectrum_N(labels = this_label, 
             NN_coeffs_norm = NN_coeffs_norm, NN_coeffs_flux = NN_coeffs_flux, 
             NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2, NN_coeffs_R = NN_coeffs_R, 
