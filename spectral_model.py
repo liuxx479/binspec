@@ -192,7 +192,7 @@ def sbN_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     
     Nv = len(spec_errs)
     labels = [Teff, logg, [Fe/H], [Mg/Fe], vmacro1, dv1] 
-             + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN] ## then below is new
+             + [q2, vmacro2, dv2] + .. [qN, vmacroN, dvN] 
              + [RV1_v2, RV2_v2.. RVN_v2] +
              ...
              + [RV1_vN, RV2_vN.. RVN_vN]
@@ -239,8 +239,30 @@ def get_radius_NN(input_labels, NN_coeffs_R):
     predict_output = np.sum(w_array_2 * sigmoid(np.sum(w_array_1 * (sigmoid(np.dot(w_array_0,
         scaled_labels) + b_array_0)), axis = 1) + b_array_1).T, axis = 1) + b_array_2
     return predict_output
-    
+
 def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
+    '''
+    Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
+    feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
+    the same age and composition. 
+    
+    labels = [Teff1, logg1, feh, q]
+    outputs [Teff2, logg2]
+    '''
+        
+    # unpack the NN
+    w_array_0, w_array_1, w_array_2, b_array_0, b_array_1, b_array_2, x_min, x_max = NN_coeffs_Teff2_logg2
+    
+    # rescale labels the same way as we trained the neural network
+    scaled_labels =  (labels - x_min)/(x_max - x_min) - 0.5
+    inside = np.dot(w_array_0, scaled_labels) + b_array_0
+    outside = np.dot(w_array_1, sigmoid(inside)) + b_array_1
+    outside = np.dot(w_array_2, sigmoid(outside)) + b_array_2
+    outside[0] *= 1000 # because the NN was trained to predict Teff/1000
+            
+    return outside
+
+def get_Teff2_logg2_NN_kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
     feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
