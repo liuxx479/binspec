@@ -240,7 +240,7 @@ def get_radius_NN(input_labels, NN_coeffs_R):
         scaled_labels) + b_array_0)), axis = 1) + b_array_1).T, axis = 1) + b_array_2
     return predict_output
 
-def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
+def get_Teff2_logg2_NN_YST(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
     feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
@@ -262,7 +262,7 @@ def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
             
     return outside
 
-def get_Teff2_logg2_NN_kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
+def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
     feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
