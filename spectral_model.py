@@ -242,6 +242,7 @@ def get_radius_NN(input_labels, NN_coeffs_R):
 
 def get_Teff2_logg2_NN_YST(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
+    Yuansen version
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
     feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
     the same age and composition. 
@@ -262,8 +263,9 @@ def get_Teff2_logg2_NN_YST(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = Tru
             
     return outside
 
-def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
+def get_Teff2_logg2_NN_Kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
+    Kareem version
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
     feh, and q. The NN was trained on isochrones of MS stars where the two stars have 
     the same age and composition. 
@@ -299,7 +301,10 @@ def get_Teff2_logg2_NN(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
             outside[1] = labels[1]
             
     return outside
-    
+
+######## JL added to make it flexible switching between YST or Kareem NN
+get_Teff2_logg2_NN = get_Teff2_logg2_NN_YST   
+
 def single_star_model_visit_spectra(labels, spec_errs, NN_coeffs_norm, NN_coeffs_flux):
     '''
     get the spectra predicted by the model for several visits. 

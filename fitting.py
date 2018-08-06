@@ -225,7 +225,6 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     p0 = [teff1, logg1, feh, alphafe, vmacro1, dv1] + [1, vmacro1, dv1]* (N-1) + [dv1,]*N*(Nv-1)
     min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
         NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
-    
     v_min, v_max = np.min(v_helios), np.max(v_helios)
     
     lower = [4200, 4.0, -1, -0.3, 0, -100] + [min_q, 0, -100+v_min]*(N-1) +  [-100+v_min,]*N*(Nv-1)
