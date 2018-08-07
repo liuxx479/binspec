@@ -389,6 +389,8 @@ def get_minimum_q_for_this_teff(Teff1, logg1, feh, NN_coeffs_Teff2_logg2, min_te
     all_teff2 = [spectral_model.get_Teff2_logg2_NN(labels = [Teff1, logg1, feh, q], 
         NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)[0] for q in qs] 
     min_q = np.interp(min_teff - 50, all_teff2, qs)
+    if min_q == 1:
+        min_q = 0.99
     return min_q
 
 def fit_visit_spectra_single_star_model(norm_spectra, spec_errs, 
