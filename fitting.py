@@ -39,8 +39,8 @@ def fit_normalized_spectrum_single_star_model(norm_spec, spec_err,
     if p0 is None: 
         p0 = [5777, 4.44, 0, 0, 5, 0]
         
-    # don't allow the minimimizer outside Teff = [3000, 7000], etc. 
-    bounds = [[3000, 4.0, -1, -0.3, 0, -100], [7000, 5.0, 0.5, 0.5, 45, 100]]
+    # don't allow the minimimizer outside Teff = [3000, 7200], etc. 
+    bounds = [[3000, 4.0, -1, -0.3, 0, -100], [7200, 5.0, 0.5, 0.5, 45, 100]]
     
     # if we want to initialize many walkers in different parts of parameter space, do so now. 
     all_x0 = generate_starting_guesses_to_initialze_optimizers(p0 = p0, bounds = bounds, 
@@ -95,7 +95,7 @@ def fit_normalized_spectrum_binary_model(norm_spec, spec_err,
         NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
         
     lower = [3000, 4.0, -1, -0.3, min_q, 0, 0, -100, -100]
-    upper = [7000, 5.0, 0.5, 0.5, 1, 45, 45, 100, 100]
+    upper = [7200, 5.0, 0.5, 0.5, 1, 45, 45, 100, 100]
     bounds = [lower, upper]
     
     # if we want to initialize many walkers in different parts of parameter space, do so now. 
@@ -167,7 +167,7 @@ def fit_normalized_spectrum_N(norm_spec, spec_err,
         NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
     
     lower = [3000, 4.0, -1, -0.3, 0, -100] + [min_q, 0, -100]*(N-1) 
-    upper = [7000, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100]*(N-1)
+    upper = [7200, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100]*(N-1)
     bounds = [lower, upper]
     
     # if we want to initialize many walkers in different parts of parameter space, do so now. 
@@ -229,9 +229,9 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     v_min, v_max = np.min(v_helios), np.max(v_helios)
     
     lower = [3000, 4.0, -1, -0.3, 0, -100] + [min_q, 0, -100+v_min]*(N-1) +  [-100+v_min,]*N*(Nv-1)
-    upper = [7000, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100+v_max]*(N-1) + [100+v_max,]*N*(Nv-1)
+    upper = [7200, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100+v_max]*(N-1) + [100+v_max,]*N*(Nv-1)
     #lower = np.concatenate([[3000, 4.0, -1, -0.3, 0], len(v_helios) * [-100 + v_min]])
-    #upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
+    #upper = np.concatenate([[7200, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
     bounds = [lower, upper]
     
     #p00 = np.concatenate([p0[:5], v_helios])
@@ -412,7 +412,7 @@ def fit_visit_spectra_single_star_model(norm_spectra, spec_errs,
         return stitched_model
         
     lower = np.array([3000, 4.0, -1, -0.3, 0, -100+np.median(v_helios)])
-    upper = np.array([7000, 5.0, 0.5, 0.5, 45, 100+np.median(v_helios)])
+    upper = np.array([7200, 5.0, 0.5, 0.5, 45, 100+np.median(v_helios)])
     bounds = [lower, upper]
     
     # coming from the combined fit, the velocity label in p0 will be relative the
@@ -453,7 +453,7 @@ def fit_visit_spectra_sb1_model(norm_spectra, spec_errs, NN_coeffs_norm, NN_coef
         
     v_min, v_max = np.min(v_helios), np.max(v_helios)
     lower = np.concatenate([[3000, 4.0, -1, -0.3, 0], len(v_helios) * [-100 + v_min]])
-    upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
+    upper = np.concatenate([[7200, 5.0, 0.5, 0.5, 45], len(v_helios) * [100 + v_max]])
     bounds = [lower, upper]
     
     p00 = np.concatenate([p0[:5], v_helios])
@@ -496,7 +496,7 @@ def fit_visit_spectra_sb2_model(norm_spectra, spec_errs, NN_coeffs_norm, NN_coef
     
     lower = np.concatenate([[3000, 4.0, -1, -0.3, min_q, 0, 0, 0.2, -100 + v_med], 
         len(v_helios) * [-100 + v_min] ])
-    upper = np.concatenate([[7000, 5.0, 0.5, 0.5, 1, 45, 45, 1.5, 100 + v_med],
+    upper = np.concatenate([[7200, 5.0, 0.5, 0.5, 1, 45, 45, 1.5, 100 + v_med],
         len(v_helios) * [100 + v_max]])
     bounds = [lower, upper]
     
