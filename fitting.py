@@ -91,8 +91,8 @@ def fit_normalized_spectrum_binary_model(norm_spec, spec_err,
     # that of the primary only)
     p0 = [teff1, logg1, feh, alphafe, 1, vmacro1, vmacro1, dv1, dv1]
     
-    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
-        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    min_q =0 #= get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        #NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
         
     lower = [3000, 0.0, -1, -0.3, min_q, 0, 0, -100, -100]
     upper = [7200, 5.0, 0.5, 0.5, 1, 45, 45, 100, 100]
@@ -163,8 +163,8 @@ def fit_normalized_spectrum_N(norm_spec, spec_err,
     # that of the primary only)
     p0 = [teff1, logg1, feh, alphafe, vmacro1, dv1] + [1, vmacro1, dv1]* (N-1)
     
-    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
-        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    min_q = 0 #get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        #NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
     
     lower = [3000, 0.0, -1, -0.3, 0, -100] + [min_q, 0, -100]*(N-1) 
     upper = [7200, 5.0, 0.5, 0.5, 45, 100] + [1, 45, 100]*(N-1)
@@ -223,8 +223,8 @@ def fit_visit_spectra_N(norm_spectra, spec_errs, NN_coeffs_norm, NN_coeffs_flux,
     # a cluster where all stars are identical (should have a spectrum identical to 
     # that of the primary only)
     p0 = [teff1, logg1, feh, alphafe, vmacro1, dv1] + [1, vmacro1, dv1]* (N-1) + [dv1,]*N*(Nv-1)
-    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
-        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    min_q = 0 #get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        #NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
     print ('JL note: min_q=',min_q)
     v_min, v_max = np.min(v_helios), np.max(v_helios)
     
@@ -493,8 +493,8 @@ def fit_visit_spectra_sb2_model(norm_spectra, spec_errs, NN_coeffs_norm, NN_coef
     sb2_p0 = np.concatenate([p0_combined[:7], [p0_combined[4]], [v_med], v_helios])
     
     teff1, logg1, feh, alphafe = p0_combined[:4]
-    min_q = get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
-        NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
+    min_q = 0# get_minimum_q_for_this_teff(Teff1 = teff1, logg1 = logg1, feh = feh, 
+        #NN_coeffs_Teff2_logg2 = NN_coeffs_Teff2_logg2)
     
     lower = np.concatenate([[3000, 0.0, -1, -0.3, min_q, 0, 0, 0.2, -100 + v_med], 
         len(v_helios) * [-100 + v_min] ])
