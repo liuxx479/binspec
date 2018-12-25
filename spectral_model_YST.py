@@ -263,7 +263,7 @@ def get_Teff2_logg2_NN_YST(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = Tru
             
     return outside
 
-def get_Teff2_logg2_NN_Kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
+#def get_Teff2_logg2_NN_Kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = True):
     '''
     Kareem version
     Use a neural network to predict Teff and logg of the secondary from Teff1, logg1,
@@ -277,30 +277,30 @@ def get_Teff2_logg2_NN_Kareem(labels, NN_coeffs_Teff2_logg2, force_lower_Teff = 
     # close to identical anyway, but we force it to gaurantee that the normalized spectrum of a 
     # binary with no velocity offset and q=1 (and same vmacro for both stars) is identical to that
     # of a single star. 
-    if np.isclose(labels[-1], 1):
-        return labels[:2]
+#    if np.isclose(labels[-1], 1):
+#        return labels[:2]
         
     # unpack the NN
-    w_array_0, w_array_1, b_array_0, b_array_1, x_min, x_max = NN_coeffs_Teff2_logg2
+#    w_array_0, w_array_1, b_array_0, b_array_1, x_min, x_max = NN_coeffs_Teff2_logg2
     
     # rescale labels the same way as we trained the neural network
-    scaled_labels =  (labels - x_min)/(x_max - x_min) - 0.5
-    inside = np.dot(w_array_0, scaled_labels) + b_array_0
-    outside = np.dot(w_array_1, sigmoid(inside)) + b_array_1
-    outside[0] *= 1000 # because the NN was trained to predict Teff/1000
+#    scaled_labels =  (labels - x_min)/(x_max - x_min) - 0.5
+#    inside = np.dot(w_array_0, scaled_labels) + b_array_0
+#    outside = np.dot(w_array_1, sigmoid(inside)) + b_array_1
+#    outside[0] *= 1000 # because the NN was trained to predict Teff/1000
     
     # For equal-age, equal-composition stars on the MS, the secondary should always 
     # be cooler than the primary and have higher logg. This should happen anyway, if the
     # NN is functioning properly, but one can force it for increased stability. Note
     # that forcing this would not make sense for giants-dwarf binaries, where the more 
     # massive star could be cooler. 
-    if force_lower_Teff:
-        if outside[0] > labels[0]: 
-            outside[0] = labels[0]
-        if outside[1] < labels[1]:
-            outside[1] = labels[1]
+#    if force_lower_Teff:
+#        if outside[0] > labels[0]: 
+#            outside[0] = labels[0]
+#        if outside[1] < labels[1]:
+#            outside[1] = labels[1]
             
-    return outside
+#    return outside
 
 ######## JL added to make it flexible switching between YST or Kareem NN
 get_Teff2_logg2_NN = get_Teff2_logg2_NN_YST   
